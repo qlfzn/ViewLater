@@ -1,8 +1,15 @@
 package api
 
+// struct for saving user's additonal metadata
+type Notes struct {
+	Description string
+	Tags        string
+}
+
 // Save video params
 type SaveVideoParams struct {
-	Url string
+	Url   string
+	Notes Notes
 }
 
 // Save video response
