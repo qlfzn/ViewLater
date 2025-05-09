@@ -1,0 +1,42 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+)
+
+type application struct {
+	config config
+}
+
+type config struct {
+	addr string
+}
+
+func (app *application) mount() http.Handler {
+	r := chi.NewRouter()
+
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Logger)
+
+	// Add prefix in related routes
+	r.Route("/v1", func(r chi.Router) {
+		r.Get("/health", app.healthCheckHandler)
+	})
+
+	return r
+}
+
+func (app *application) run(mux http.Handler) error {
+	srv := &http.Server{
+		Addr:    app.config.addr,
+		Handler: mux,
+	}
+
+	log.Printf("server has started at http://localhost:8080")
+
+	return srv.ListenAndServe()
+}

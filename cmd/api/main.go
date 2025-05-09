@@ -1,18 +1,18 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"log"
 )
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
+	cfg := config{
+		":8080",
+	}
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hello from the server"))
-	})
-	http.ListenAndServe(":8080", r)
+	app := application{
+		cfg,
+	}
+
+	mux := app.mount()
+	log.Fatal(app.run(mux))
 }
