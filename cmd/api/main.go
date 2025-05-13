@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -9,8 +11,13 @@ func main() {
 		":8080",
 	}
 
+	// Logger
+	logger := zap.Must(zap.NewProduction()).Sugar()
+	defer logger.Sync()
+
 	app := application{
 		cfg,
+		logger,
 	}
 
 	mux := app.mount()

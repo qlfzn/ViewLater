@@ -4,12 +4,15 @@ import (
 	"log"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
 
 type application struct {
 	config config
+	logger *zap.SugaredLogger
 }
 
 type config struct {
@@ -27,6 +30,7 @@ func (app *application) mount() http.Handler {
 	// Add prefix in related routes
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
+		r.Post("/videos", app.saveVideoHandler)
 	})
 
 	return r
