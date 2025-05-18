@@ -8,11 +8,13 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/qlfzn/viewlater/internal/handlers"
 )
 
 type application struct {
-	config config
-	logger *zap.SugaredLogger
+	config  config
+	logger  *zap.SugaredLogger
+	handler *handlers.Handler
 }
 
 type config struct {
@@ -30,7 +32,7 @@ func (app *application) mount() http.Handler {
 	// Add prefix in related routes
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
-		r.Post("/videos", app.saveVideoHandler)
+		r.Post("/videos", app.handler.SaveVideoHandler)
 	})
 
 	return r

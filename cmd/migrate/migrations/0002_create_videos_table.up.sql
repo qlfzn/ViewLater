@@ -1,0 +1,5 @@
+CREATE TABLE videos (
+    id SERIAL PRIMARY KEY,
+    url TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
