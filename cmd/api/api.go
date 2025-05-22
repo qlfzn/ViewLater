@@ -8,17 +8,14 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/qlfzn/viewlater/config"
 	"github.com/qlfzn/viewlater/internal/handlers"
 )
 
 type application struct {
-	config  config
+	config  config.Config
 	logger  *zap.SugaredLogger
 	handler *handlers.Handler
-}
-
-type config struct {
-	addr string
 }
 
 func (app *application) mount() http.Handler {
@@ -40,7 +37,7 @@ func (app *application) mount() http.Handler {
 
 func (app *application) run(mux http.Handler) error {
 	srv := &http.Server{
-		Addr:    app.config.addr,
+		Addr:    app.config.PORT,
 		Handler: mux,
 	}
 

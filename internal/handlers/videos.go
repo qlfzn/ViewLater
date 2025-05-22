@@ -8,19 +8,17 @@ import (
 	"go.uber.org/zap"
 )
 
-// encapsulates video notes data
-type Notes struct {
-	Description string
-	Type        string
-}
-
 type NewVideoPayload struct {
-	Url   string `json:"url"`
-	Notes string `json:"notes"`
+	Url         string   `json:"url"`
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	Tags        []string `json:"tags"`
 }
 
+// consists of all dependencies related
 type Handler struct {
 	Logger *zap.SugaredLogger
+	Store  store.VideoStore
 }
 
 func (h *Handler) SaveVideoHandler(w http.ResponseWriter, r *http.Request) {
@@ -41,15 +39,27 @@ func (h *Handler) SaveVideoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: call store service
 	video := &store.NewVideo{
-		Url: payload.Url,
+		Url:         payload.Url,
+		Title:       payload.Title,
+		Description: payload.Description,
+		Tags:        payload.Tags,
+	}
+
+	ctx := r.Context()
+
+	if err := h.Store.SaveVideo(ctx, video); err != nil {
+		h.Logger.Errorf("error saving video: %v", err)
+		writeJSON(w, http.StatusInternalServerError, map[string]string{
+			"error": "failed to save video",
+		})
+		return
 	}
 
 	// success response
 	writeJSON(w, http.StatusOK, map[string]string{
-		"message": "video received successfully",
-		"url":     payload.Url,
-		"notes":   payload.Notes,
+		"message":     "video received successfully",
+		"url":         payload.Url,
+		"description": payload.Description,
 	})
 }

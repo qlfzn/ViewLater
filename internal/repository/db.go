@@ -2,31 +2,19 @@ package repository
 
 import (
 	"context"
-	"database/sql"
-	"time"
+	"fmt"
+	"os"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func New(addr string, maxOpenConns int, maxIdleConns int, maxIdleTime string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", addr)
+func New(url string) *pgxpool.Pool {
+	pool, err := pgxpool.New(context.Background(), url)
 	if err != nil {
-		return nil, err
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		os.Exit(1)
+		return nil
 	}
 
-	db.SetMaxOpenConns(maxOpenConns)
-	db.SetMaxIdleConns(maxIdleConns)
-
-	duration, err := time.ParseDuration(maxIdleTime)
-	if err != nil {
-		return nil, err
-	}
-	db.SetConnMaxIdleTime(duration)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err = db.PingContext(ctx); err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return pool
 }
