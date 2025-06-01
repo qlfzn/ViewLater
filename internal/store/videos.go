@@ -32,7 +32,7 @@ func (v *VideoStore) SaveVideo(ctx context.Context, video *NewVideo) error {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	err := v.DB.QueryRow(ctx, query, video.Url).Scan(&video.ID, createdAt)
+	err := v.DB.QueryRow(ctx, query, video.Url).Scan(&video.ID, &createdAt)
 	if err != nil {
 		return err
 	}
