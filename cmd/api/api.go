@@ -12,6 +12,7 @@ import (
 	"github.com/qlfzn/viewlater/internal/handlers"
 )
 
+// represents the application of the whole project
 type application struct {
 	config  config.Config
 	logger  *zap.SugaredLogger

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/qlfzn/viewlater/internal/middleware"
 	"github.com/qlfzn/viewlater/internal/store"
 	"go.uber.org/zap"
 )
@@ -47,6 +48,14 @@ func (h *Handler) SaveVideoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
+
+	source := &middleware.Source{}
+	if err := source.ParseAndValidateUrl(video.Url); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{
+			"error": "invalid origin",
+		})
+		return
+	}
 
 	if err := h.Store.SaveVideo(ctx, video); err != nil {
 		h.Logger.Errorf("error saving video: %v", err)
