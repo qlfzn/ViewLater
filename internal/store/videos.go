@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type NewVideo struct {
+type Video struct {
 	ID          int64     `json:"id"`
 	Url         string    `json:"url"`
 	Title       string    `json:"title"`
@@ -21,11 +21,11 @@ type VideoStore struct {
 	DB *pgxpool.Pool
 }
 
-func (v *VideoStore) SaveVideo(ctx context.Context, video *NewVideo) error {
+func (v *VideoStore) SaveVideo(ctx context.Context, video *Video) error {
 	// insert into videos table
 	query := `
-			INSERT INTO videos (url)
-			VALUES ($1) RETURNING id, created_at
+		INSERT INTO videos (url)
+		VALUES ($1) RETURNING id, created_at
 	`
 	var createdAt time.Time
 
@@ -39,9 +39,9 @@ func (v *VideoStore) SaveVideo(ctx context.Context, video *NewVideo) error {
 
 	// insert into user_videos
 	queryUserVideos := `
-			INSERT INTO user_videos (video_id, title, description, tags)
-			VALUES ($1, $2, $3, $4)
-			RETURNING id, created_at
+		INSERT INTO user_videos (video_id, title, description, tags)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, created_at
 	`
 
 	err = v.DB.QueryRow(
@@ -57,4 +57,33 @@ func (v *VideoStore) SaveVideo(ctx context.Context, video *NewVideo) error {
 	}
 
 	return nil
+}
+
+func (v *VideoStore) GetVideoById(ctx context.Context, videoID int64) (*Video, error) {
+	query := `
+		SELECT * FROM videos (id)
+		LEFT JOIN user_videos
+		ON videos.id = user_videos.video_id
+		VALUES ($1)
+	`
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	var video Video
+
+	err := v.DB.QueryRow(ctx, query, videoID).Scan(
+		&video.ID,
+		&video.Url,
+		&video.Title,
+		&video.Description,
+		&video.Tags,
+		&video.CreatedAt,
+		&video.UserID,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &video, nil
 }

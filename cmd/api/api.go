@@ -12,7 +12,6 @@ import (
 	"github.com/qlfzn/viewlater/internal/handlers"
 )
 
-// represents the application of the whole project
 type application struct {
 	config  config.Config
 	logger  *zap.SugaredLogger
@@ -31,6 +30,7 @@ func (app *application) mount() http.Handler {
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
 		r.Post("/videos", app.handler.SaveVideoHandler)
+		r.Get("/videos?id", app.handler.GetVideoHandler)
 	})
 
 	return r

@@ -13,9 +13,9 @@ var (
 )
 
 type VideoRepository interface {
-	SaveVideo(context.Context, *NewVideo) error
+	SaveVideo(context.Context, *Video) error
 	GetVideoById(context.Context, int64) error
-	Update(context.Context, *NewVideo) error
+	Update(context.Context, *Video) error
 }
 
 type Storage struct {
